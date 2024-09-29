@@ -1,0 +1,40 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: gce-maintenance-detector
+  name: gce-maintenance-detector
+  namespace: kube-system
+spec:
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: gce-maintenance-detector
+  template:
+    metadata:
+      labels:
+        app: gce-maintenance-detector
+      name: gce-maintenance-detector
+    spec:
+      hostNetwork: true
+      hostPID: true
+      containers:
+      - name: gce-maintenance-detector
+        image: ko://github.com/epk/gce-maintenance-detector/cmd/detector
+        resources:
+          limits:
+            cpu: 50m
+            memory: 50Mi
+          requests:
+            cpu: 50m
+            memory: 50Mi
+      dnsPolicy: Default
+      priorityClassName: high-priority-no-preempt
+      tolerations:
+      - operator: Exists
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 20%
+    type: RollingUpdate
